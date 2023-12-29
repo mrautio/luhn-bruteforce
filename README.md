@@ -1,3 +1,5 @@
+![Build](https://github.com/mrautio/luhn-bruteforce/workflows/Build/badge.svg)
+
 # Luhn bruteforce
 
 Tool to deduce or generate various values that utilize [Luhn checksum (modulus 10)](https://en.wikipedia.org/wiki/Luhn_algorithm), such as, credit card numbers (PANs).
