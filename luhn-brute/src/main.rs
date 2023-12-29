@@ -15,8 +15,26 @@ pub struct Args {
 
 fn main() -> ExitCode {
     let args = Args::parse();
-    let explodable_values = args
-        .values
+    let mut values = explode_arrays(value_argument_to_explodable_values(&args.values));
+
+    if args.generate_luhn {
+        add_luhn_checksums(&mut values);
+    }
+
+    let valid_luhns = get_valid_luhns(values.clone());
+    for i in valid_luhns.iter() {
+        println!("{}", i);
+    }
+
+    if valid_luhns.len() == 0 {
+        return ExitCode::FAILURE;
+    }
+
+    ExitCode::SUCCESS
+}
+
+pub fn value_argument_to_explodable_values(values: &Vec<String>) -> Vec<Vec<String>> {
+    values
         .clone()
         .into_iter()
         .map(|value| {
@@ -37,23 +55,7 @@ fn main() -> ExitCode {
                 value.split(",").map(|value| value.to_string()).collect()
             }
         })
-        .collect();
-    let mut values = explode_arrays(explodable_values);
-
-    if args.generate_luhn {
-        add_luhn_checksums(&mut values);
-    }
-
-    let valid_luhns = get_valid_luhns(values.clone());
-    for i in valid_luhns.iter() {
-        println!("{}", i);
-    }
-
-    if valid_luhns.len() == 0 {
-        return ExitCode::FAILURE;
-    }
-
-    ExitCode::SUCCESS
+        .collect()
 }
 
 pub fn explode_arrays(list: Vec<Vec<String>>) -> Vec<String> {
@@ -122,6 +124,14 @@ mod tests {
             "9".to_string(),
         ]);
         list.push(vec!["11111111".to_string()]);
+
+        let explodable_values = value_argument_to_explodable_values(&vec![
+            "411111".to_string(),
+            "N".to_string(),
+            "0,1,3,8,9".to_string(),
+            "11111111".to_string(),
+        ]);
+        assert_eq!(explodable_values, list);
 
         let result = explode_arrays(list);
         assert_eq!(result.len(), 50);
